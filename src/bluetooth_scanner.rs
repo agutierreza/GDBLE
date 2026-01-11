@@ -227,6 +227,15 @@ impl BluetoothScanner {
                             let address = id.to_string();
                             let name = properties.local_name.clone();
                             let rssi = properties.rssi;
+                            
+                            // Convert UUIDs to strings
+                            let services: Vec<String> = properties.services
+                                .iter()
+                                .map(|uuid| uuid.to_string())
+                                .collect();
+                                
+                            // Copy manufacturer data
+                            let manufacturer_data = properties.manufacturer_data.clone();
 
                             ble_info!(
                                 "Discovered device: {} ({}), RSSI: {:?}",
@@ -235,7 +244,13 @@ impl BluetoothScanner {
                                 rssi
                             );
 
-                            let device_info = DeviceInfo::new(address.clone(), name, rssi);
+                            let device_info = DeviceInfo::new(
+                                address.clone(), 
+                                name, 
+                                rssi,
+                                services,
+                                manufacturer_data
+                            );
 
                             // Store device
                             if let Ok(mut devices) = self.discovered_devices.lock() {
@@ -265,6 +280,15 @@ impl BluetoothScanner {
                             let name = properties.local_name.clone();
                             let rssi = properties.rssi;
 
+                            // Convert UUIDs to strings
+                            let services: Vec<String> = properties.services
+                                .iter()
+                                .map(|uuid| uuid.to_string())
+                                .collect();
+                                
+                            // Copy manufacturer data
+                            let manufacturer_data = properties.manufacturer_data.clone();
+
                             ble_debug!(
                                 "Updated device: {} ({}), RSSI: {:?}",
                                 name.as_ref().unwrap_or(&"Unknown".to_string()),
@@ -272,7 +296,13 @@ impl BluetoothScanner {
                                 rssi
                             );
 
-                            let device_info = DeviceInfo::new(address.clone(), name, rssi);
+                            let device_info = DeviceInfo::new(
+                                address.clone(), 
+                                name, 
+                                rssi,
+                                services,
+                                manufacturer_data
+                            );
 
                             // Update device
                             let should_send = if let Ok(mut devices) = self.discovered_devices.lock() {

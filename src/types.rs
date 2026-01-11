@@ -60,15 +60,25 @@ pub struct DeviceInfo {
     pub address: String,
     pub name: Option<String>,
     pub rssi: Option<i16>,
+    pub services: Vec<String>,
+    pub manufacturer_data: std::collections::HashMap<u16, Vec<u8>>,
 }
 
 impl DeviceInfo {
     /// 创建新的设备信息
-    pub fn new(address: String, name: Option<String>, rssi: Option<i16>) -> Self {
+    pub fn new(
+        address: String, 
+        name: Option<String>, 
+        rssi: Option<i16>,
+        services: Vec<String>,
+        manufacturer_data: std::collections::HashMap<u16, Vec<u8>>,
+    ) -> Self {
         Self {
             address,
             name,
             rssi,
+            services,
+            manufacturer_data,
         }
     }
 
@@ -88,6 +98,24 @@ impl DeviceInfo {
         } else {
             dict.set("rssi", Variant::nil());
         }
+
+        // Services
+        let mut services_array: Array<GString> = Array::new();
+        for service in &self.services {
+            services_array.push(&GString::from(service));
+        }
+        dict.set("services", services_array);
+
+        // Manufacturer Data
+        let mut manuf_dict = Dictionary::new();
+        for (id, data) in &self.manufacturer_data {
+            let mut byte_array = PackedByteArray::new();
+            for byte in data {
+                byte_array.push(*byte);
+            }
+            manuf_dict.set(*id, byte_array);
+        }
+        dict.set("manufacturer_data", manuf_dict);
         
         dict
     }
